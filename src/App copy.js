@@ -2,10 +2,7 @@ import React, { Component } from 'react';
 import firebase, { auth, provider } from './firebase.js';
 import GitHub from './github.js';
 import './App.css';
-import Home from './Home.js';
-import Test from './Test.js';
-import UserRadar from './UserRadar.js';
-
+import TechRader from './tech-radar.js';
 import { BrowserRouter as Router, Route, Link, withRouter } from "react-router-dom";
 
 const github =  new GitHub();
@@ -15,9 +12,14 @@ class App extends Component {
   constructor() {
     super();
     this.state = {
+      currentItem: '',
+      username: '',
+      items: [],
       user: null,
       accessToken: null
     }
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this); 
     this.login = this.login.bind(this);
     this.logout = this.logout.bind(this); 
   }
@@ -26,7 +28,7 @@ class App extends Component {
     let path = localStorage.getItem('path');
     if(path) {
       localStorage.removeItem('path');
-      this.props.history.push(path);
+      this.props.history.push([path]);
     }
     auth.onAuthStateChanged((user) => {
       if (user) {
@@ -36,8 +38,44 @@ class App extends Component {
         // TODO restore additional user information from firebase
       } 
     });
+    const itemsRef = firebase.database().ref('items');
+    itemsRef.on('value', (snapshot) => {
+      let items = snapshot.val();
+      let newState = [];
+      for (let item in items) {
+        newState.push({
+          id: item,
+          title: items[item].title,
+          user: items[item].user
+        });
+      }
+      this.setState({
+        items: newState
+      });
+    });
   }
 
+  handleChange(e) {
+    this.setState({
+      [e.target.name]: e.target.value
+    });
+  }
+
+  handleSubmit(e) {
+    e.preventDefault();
+    const itemsRef = firebase.database().ref('items');
+    const item = {
+      title: this.state.currentItem,
+      user: this.state.user.displayName || this.state.user.email
+    }
+    itemsRef.push(item);
+    this.setState({
+      currentItem: '',
+      username: ''
+    });
+    this.login = this.login.bind(this); // <-- add this line
+    this.logout = this.logout.bind(this); //
+  }
   logout() {
     auth.signOut()
       .then(() => {
@@ -47,7 +85,6 @@ class App extends Component {
         });
       });
   }
-
   login() {
     auth.signInWithPopup(provider) 
       .then(async (result) => {
@@ -85,11 +122,8 @@ class App extends Component {
             <span className="navbar-toggler-icon"></span>
           </button>
           <ul className="navbar-nav mr-auto">
-            <li className="nav-item">
-              <Link className="nav-link" to="/">My Radar</Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/following">Following</Link>
+            <li className="nav-item active">
+              <a className="nav-link" href="#">Home <span className="sr-only">(current)</span></a>
             </li>
           </ul>
           <div className="form-inline my-2 my-lg-0">
@@ -104,10 +138,7 @@ class App extends Component {
         </nav>
 
         <main role="main" className="container">
-            <Route exact path="/">
-              <Home />
-            </Route>
-            <Route path="/u/:uid" children={<UserRadar />} />
+          <TechRader></TechRader>
         </main>
       </div>
     );
