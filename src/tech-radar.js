@@ -1,7 +1,16 @@
 import React, { Component } from 'react';
 
 class TechRader extends Component {
+
+  constructor() {
+    super();
+  }
+
+
   componentDidMount() {
+  }
+  
+  render() {
     window.radar_visualization({
       svg_id: "radar",
       width: 1450,
@@ -13,40 +22,21 @@ class TechRader extends Component {
       },
       title: "My Radar",
       quadrants: [
-        { name: "Bottom Right" },
-        { name: "Bottom Left" },
-        { name: "Top Left" },
-        { name: "Top Right" }
+        { name: "Languages" },
+        { name: "Infrastructure" },
+        { name: "Frameworks" },
+        { name: "Data Management" }
       ],
       rings: [
-        { name: "INNER",  color: "#93c47d" },
-        { name: "SECOND", color: "#b7e1cd" },
-        { name: "THIRD",  color: "#fce8b2" },
-        { name: "OUTER",  color: "#f4c7c3" }
+        { name: "ADOPT",  color: "#93c47d" },
+        { name: "TRIAL", color: "#b7e1cd" },
+        { name: "ASSESS",  color: "#fce8b2" },
+        { name: "HOLD",  color: "#f4c7c3" }
       ],
       print_layout: true,
-      entries: [
-      {
-          label: "Some Entry",
-          quadrant: 3,          // 0,1,2,3 (counting clockwise, starting from bottom right)
-          ring: 2,              // 0,1,2,3 (starting from inside)
-          moved: -1             // -1 = moved out (triangle pointing down)
-                                //  0 = not moved (circle)
-                                //  1 = moved in  (triangle pointing up)
-      },
-      {
-        quadrant: 0,
-        ring: 0,
-        label: "Python",
-        active: true,
-        link: "python.html",
-        moved: 0
-      }
-      ]
+      entries: this.props.entries
     });
-  }
-  
-  render() {
+
     var styleObj = {
     }
     return (

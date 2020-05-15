@@ -2,8 +2,7 @@ import React, { Component } from 'react';
 import firebase, { auth, provider } from './firebase.js';
 import GitHub from './github.js';
 import './App.css';
-import TechRader from './tech-radar.js';
-import { BrowserRouter as Router, Route, Link, withRouter } from "react-router-dom";
+import { Link, withRouter } from "react-router-dom";
 
 const github =  new GitHub();
 
@@ -16,12 +15,10 @@ class Home extends Component {
       username: '',
       items: [],
       user: null,
-      accessToken: null
+      accessToken: null,
+      entries: []
     }
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this); 
     this.login = this.login.bind(this);
-    this.logout = this.logout.bind(this); 
   }
 
   componentDidMount() {
@@ -33,53 +30,8 @@ class Home extends Component {
         // TODO restore additional user information from firebase
       } 
     });
-    const itemsRef = firebase.database().ref('items');
-    itemsRef.on('value', (snapshot) => {
-      let items = snapshot.val();
-      let newState = [];
-      for (let item in items) {
-        newState.push({
-          id: item,
-          title: items[item].title,
-          user: items[item].user
-        });
-      }
-      this.setState({
-        items: newState
-      });
-    });
   }
 
-  handleChange(e) {
-    this.setState({
-      [e.target.name]: e.target.value
-    });
-  }
-
-  handleSubmit(e) {
-    e.preventDefault();
-    const itemsRef = firebase.database().ref('items');
-    const item = {
-      title: this.state.currentItem,
-      user: this.state.user.displayName || this.state.user.email
-    }
-    itemsRef.push(item);
-    this.setState({
-      currentItem: '',
-      username: ''
-    });
-    this.login = this.login.bind(this); // <-- add this line
-    this.logout = this.logout.bind(this); //
-  }
-  logout() {
-    auth.signOut()
-      .then(() => {
-        this.setState({ 
-          user: null,
-          accessToken: null
-        });
-      });
-  }
   login() {
     auth.signInWithPopup(provider) 
       .then(async (result) => {
@@ -110,7 +62,20 @@ class Home extends Component {
 
   render() {
     return (
-      <TechRader></TechRader>
+      <main role="main" className="container">
+        <div class="jumbotron">
+          <div class="container">
+            <h1 class="display-3">Curate your own Tech-Radar and share it with the world</h1>
+            <p>Login with your Github account and create your own Tech Radar. The changed are directly shared with your followers on Github.</p>
+            {this.state.user ?
+              <p><Link className="btn btn-light" to="/my">My Rader</Link></p>
+              :
+              <p><button class="btn btn-light" onClick={this.login}>Login using GitHub</button></p>
+            }
+            
+          </div>
+        </div>
+      </main>
     );
   }
 }

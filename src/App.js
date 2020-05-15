@@ -3,10 +3,10 @@ import firebase, { auth, provider } from './firebase.js';
 import GitHub from './github.js';
 import './App.css';
 import Home from './Home.js';
-import Test from './Test.js';
 import UserRadar from './UserRadar.js';
+import MyRadar from './MyRadar.js';
 
-import { BrowserRouter as Router, Route, Link, withRouter } from "react-router-dom";
+import { Route, Link, withRouter } from "react-router-dom";
 
 const github =  new GitHub();
 
@@ -16,7 +16,8 @@ class App extends Component {
     super();
     this.state = {
       user: null,
-      accessToken: null
+      accessToken: null,
+      githubUsername: null
     }
     this.login = this.login.bind(this);
     this.logout = this.logout.bind(this); 
@@ -32,6 +33,17 @@ class App extends Component {
       if (user) {
         console.log(user);
         this.setState({ user });
+        var userRef = firebase.database().ref('users/'+user.uid);
+        userRef.once("value", snapshot => {
+          var item = snapshot.val();
+          var accessToken = item.accessToken;
+          var githubUsername = item.githubUsername;
+          console.log("Restored user", accessToken, githubUsername)
+          this.setState({ 
+            accessToken,
+            githubUsername
+          });
+        })
         // TODO restore access for github
         // TODO restore additional user information from firebase
       } 
@@ -43,7 +55,8 @@ class App extends Component {
       .then(() => {
         this.setState({ 
           user: null,
-          accessToken: null
+          accessToken: null,
+          githubUsername: null
         });
       });
   }
@@ -53,9 +66,11 @@ class App extends Component {
       .then(async (result) => {
         const user = result.user;
         const accessToken = result.credential.accessToken;
+        const githubUsername = result.additionalUserInfo.username;
         console.log("logged in as", result);
         this.setState({
           user,
+          githubUsername,
           accessToken
         });
         let followers = await github.getFollowers(accessToken);
@@ -80,21 +95,21 @@ class App extends Component {
     return (
       <div className='app'>
         <nav className="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-                <a className="navbar-brand" href="#">Radardish</a>
+            <Link className="navbar-brand" to="/">Radardish</Link>
           <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
             <span className="navbar-toggler-icon"></span>
           </button>
           <ul className="navbar-nav mr-auto">
-            <li className="nav-item">
-              <Link className="nav-link" to="/">My Radar</Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/following">Following</Link>
-            </li>
+            {this.state.user ?
+              <li className="nav-item">
+                <Link className="nav-link" to="/my">My Radar</Link>
+              </li>
+              :
+              <li></li>
+            }
           </ul>
           <div className="form-inline my-2 my-lg-0">
-          {this.state.user ?
-
+            {this.state.user ?
               <button className="btn btn-dark" onClick={this.logout}>Log Out</button> 
               :
               <button className="btn btn-light" onClick={this.login}><i className="fa fa-github" aria-hidden="true"></i> Login</button>
@@ -103,12 +118,17 @@ class App extends Component {
           </div>
         </nav>
 
-        <main role="main" className="container">
-            <Route exact path="/">
-              <Home />
-            </Route>
-            <Route path="/u/:uid" children={<UserRadar />} />
-        </main>
+        <Route exact path="/">
+          <Home />
+        </Route>
+        <Route path="/my">
+          {this.state.githubUsername ?
+            <MyRadar githubUsername={this.state.githubUsername}/>
+            :
+            <h1>Loading Data</h1>
+          }
+        </Route>
+        <Route path="/u/:uid" children={<UserRadar />} />
       </div>
     );
   }

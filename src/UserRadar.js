@@ -1,13 +1,9 @@
 import React, { Component } from 'react';
-import firebase, { auth, provider } from './firebase.js';
+import firebase from './firebase.js';
 import GitHub from './github.js';
 import './App.css';
 import TechRader from './tech-radar.js';
 import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  Link,
   withRouter
 } from "react-router-dom";
 const github =  new GitHub();
@@ -17,7 +13,8 @@ class UserRadar extends Component {
   constructor() {
     super();
     this.state = {
-      uid: null
+      uid: null,
+      entries: []
       //currentItem: ''
     }
   }
@@ -28,30 +25,33 @@ class UserRadar extends Component {
       uid: uid
       //currentItem: ''
     });
-    /*
-    const itemsRef = firebase.database().ref('items');
+    
+    const itemsRef = firebase.database().ref('radars/'+uid);
     itemsRef.on('value', (snapshot) => {
       let items = snapshot.val();
       let newState = [];
       for (let item in items) {
         newState.push({
-          id: item,
-          title: items[item].title,
-          user: items[item].user
+          label: item,
+          quadrant: items[item].quadrant,
+          ring: items[item].ring,
+          moved: items[item].moved,
+          active: items[item].active,
+          link: items[item].link
         });
       }
       this.setState({
-        items: newState
+        entries: newState
       });
-    });*/
+    }); 
   }
 
   render() {
     return (
-      <div>
+      <main role="main" className="container-fluid">
         <h1> {this.state.uid } </h1>
-        <TechRader></TechRader>
-      </div>
+        <TechRader entries={this.state.entries}></TechRader>
+      </main>
     );
   }
 }
