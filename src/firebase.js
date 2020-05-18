@@ -2,7 +2,7 @@ import firebase from 'firebase'
 
 var config = {
   apiKey: "AIzaSyCLPdPZE3AXJWI4IyaxNUH1Vns_btyRmGY",
-  authDomain: "radardish-1e181.firebaseapp.com",
+  authDomain: "radardish.github.io",
   databaseURL: "https://radardish-1e181.firebaseio.com",
   projectId: "radardish-1e181",
   storageBucket: "radardish-1e181.appspot.com",
