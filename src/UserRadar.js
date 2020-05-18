@@ -6,7 +6,6 @@ import TechRader from './tech-radar.js';
 import {
   withRouter
 } from "react-router-dom";
-const github =  new GitHub();
 
 class UserRadar extends Component {
 

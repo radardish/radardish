@@ -1,14 +1,6 @@
 import React, { Component } from 'react';
 
 class TechRader extends Component {
-
-  constructor() {
-    super();
-  }
-
-
-  componentDidMount() {
-  }
   
   render() {
     window.radar_visualization({
