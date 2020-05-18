@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import firebase from './firebase.js';
-import GitHub from './github.js';
 import './App.css';
 import TechRader from './tech-radar.js';
 import {
